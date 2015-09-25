@@ -27,29 +27,16 @@ impl<N: Nat> Nat for (N, _1) {
 }
 
 /// Trait making GenericArray work
-pub trait ArrayLength<T> : Nat {
+pub unsafe trait ArrayLength<T> : Nat {
 	/// Associated type representing the array type for the number
 	type ArrayType;
 }
 
-/// Empty array - needed to end recursion
-#[allow(dead_code)]
-pub struct EmptyArray<T> {
-	_marker: PhantomData<T>
+unsafe impl<T> ArrayLength<T> for _0 {
+	type ArrayType = ();
 }
-
-/// Array with a single element - for _1
-#[allow(dead_code)]
-#[repr(C)]
-pub struct UnitArray<T> {
-	data: T
-}
-
-impl<T> ArrayLength<T> for _0 {
-	type ArrayType = EmptyArray<T>;
-}
-impl<T> ArrayLength<T> for _1 {
-	type ArrayType = UnitArray<T>;
+unsafe impl<T> ArrayLength<T> for _1 {
+	type ArrayType = T;
 }
 
 #[allow(dead_code)]
@@ -68,11 +55,11 @@ pub struct GenericArrayImplOdd<T, U> {
 	data: T
 }
 
-impl<T, N: ArrayLength<T>> ArrayLength<T> for (N, _0) {
+unsafe impl<T, N: ArrayLength<T>> ArrayLength<T> for (N, _0) {
 	type ArrayType = GenericArrayImplEven<T, N::ArrayType>;
 }
 
-impl<T, N: ArrayLength<T>> ArrayLength<T> for (N, _1) {
+unsafe impl<T, N: ArrayLength<T>> ArrayLength<T> for (N, _1) {
 	type ArrayType = GenericArrayImplOdd<T, N::ArrayType>;
 }
 
