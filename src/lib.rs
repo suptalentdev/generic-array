@@ -8,11 +8,6 @@ pub struct _0;
 #[derive(Debug, Copy, Clone)]
 pub struct _1;
 
-/// Single type-level bit, `_0` or `_1`.
-pub trait Bit { }
-impl Bit for _0 { }
-impl Bit for _1 { }
-
 /// Nonnegative type-level integer, e.g., `((_1,_0),_1) = 0b101 = 25`.
 pub trait Nat {
     fn reify() -> u64;
@@ -32,11 +27,24 @@ pub unsafe trait ArrayLength<T> : Nat {
 	type ArrayType;
 }
 
+/// Empty array - needed to end recursion
+#[allow(dead_code)]
+pub struct EmptyArray<T> {
+	_marker: PhantomData<T>
+}
+
+/// Array with a single element - for _1
+#[allow(dead_code)]
+#[repr(C)]
+pub struct UnitArray<T> {
+	data: T
+}
+
 unsafe impl<T> ArrayLength<T> for _0 {
-	type ArrayType = ();
+	type ArrayType = EmptyArray<T>;
 }
 unsafe impl<T> ArrayLength<T> for _1 {
-	type ArrayType = T;
+	type ArrayType = UnitArray<T>;
 }
 
 #[allow(dead_code)]
