@@ -40,6 +40,7 @@ extern crate serde;
 pub mod arr;
 pub mod iter;
 pub use iter::GenericArrayIter;
+mod hex;
 
 #[cfg(feature="serde")]
 pub mod impl_serde;
@@ -180,12 +181,6 @@ impl<T: Default, N> GenericArray<T, N> where N: ArrayLength<T> {
         }
     }
 
-}
-
-impl<T: Default, N> Default for GenericArray<T, N> where N: ArrayLength<T> {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl<T: Clone, N> GenericArray<T, N> where N: ArrayLength<T> {
