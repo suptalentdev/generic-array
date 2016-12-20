@@ -1,6 +1,6 @@
 use nodrop::NoDrop;
-use core::cmp;
-use core::ptr;
+use std::cmp;
+use std::ptr;
 use super::{GenericArray, ArrayLength};
 
 /// An iterator that moves out of a `GenericArray`
@@ -13,9 +13,7 @@ pub struct GenericArrayIter<T, N: ArrayLength<T>> {
     index_back: usize,
 }
 
-impl<T, N> IntoIterator for GenericArray<T, N>
-    where N: ArrayLength<T>
-{
+impl<T, N> IntoIterator for GenericArray<T, N> where N: ArrayLength<T> {
     type Item = T;
     type IntoIter = GenericArrayIter<T, N>;
 
@@ -28,22 +26,16 @@ impl<T, N> IntoIterator for GenericArray<T, N>
     }
 }
 
-impl<T, N> Drop for GenericArrayIter<T, N>
-    where N: ArrayLength<T>
-{
+impl<T, N> Drop for GenericArrayIter<T, N> where N: ArrayLength<T> {
     fn drop(&mut self) {
         // Drop values that are still alive.
         for p in &mut self.array[self.index..self.index_back] {
-            unsafe {
-                ptr::drop_in_place(p);
-            }
+            unsafe { ptr::drop_in_place(p); }
         }
     }
 }
 
-impl<T, N> Iterator for GenericArrayIter<T, N>
-    where N: ArrayLength<T>
-{
+impl<T, N> Iterator for GenericArrayIter<T, N> where N: ArrayLength<T> {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
@@ -72,9 +64,7 @@ impl<T, N> Iterator for GenericArrayIter<T, N>
         let ndrop = cmp::min(n, self.len());
         for p in &mut self.array[self.index..self.index + ndrop] {
             self.index += 1;
-            unsafe {
-                ptr::drop_in_place(p);
-            }
+            unsafe { ptr::drop_in_place(p); }
         }
 
         self.next()
@@ -86,9 +76,7 @@ impl<T, N> Iterator for GenericArrayIter<T, N>
     }
 }
 
-impl<T, N> DoubleEndedIterator for GenericArrayIter<T, N>
-    where N: ArrayLength<T>
-{
+impl<T, N> DoubleEndedIterator for GenericArrayIter<T, N> where N: ArrayLength<T> {
     fn next_back(&mut self) -> Option<T> {
         if self.len() > 0 {
             self.index_back -= 1;
@@ -102,9 +90,7 @@ impl<T, N> DoubleEndedIterator for GenericArrayIter<T, N>
     }
 }
 
-impl<T, N> ExactSizeIterator for GenericArrayIter<T, N>
-    where N: ArrayLength<T>
-{
+impl<T, N> ExactSizeIterator for GenericArrayIter<T, N> where N: ArrayLength<T> {
     fn len(&self) -> usize {
         self.index_back - self.index
     }

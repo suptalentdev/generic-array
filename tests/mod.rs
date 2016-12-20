@@ -1,9 +1,8 @@
-#![no_std]
 #[macro_use]
 extern crate generic_array;
 use generic_array::typenum::{U3, U97};
 use generic_array::GenericArray;
-use core::ops::Drop;
+use std::ops::Drop;
 
 #[test]
 fn test() {
@@ -18,7 +17,6 @@ fn test() {
     assert_eq!(l[56], 56);
 }
 
-#[allow(non_upper_case_globals)]
 static mut drop_counter: u32 = 0;
 
 #[derive(Clone)]
@@ -67,21 +65,21 @@ fn test_iter_flat_map() {
 }
 
 #[test]
-fn test_from_slice() {
-    let arr = [1,2,3,4];
-    let gen_arr = generic_array::from_slice::<_, U3>(&arr[..3]);
-    assert_eq!(&arr[..3], gen_arr.as_slice());
+fn test_unit_macro(){
+    let arr = arr![f32; 3.14];
+    assert_eq!(arr[0], 3.14);
 }
 
 #[test]
-fn test_from_mut_slice() {
-    let mut arr = [1,2,3,4];
-    {
-        let mut gen_arr = generic_array::from_mut_slice::<_, U3>(&mut arr[..3]);
-        gen_arr[2] = 10;
-    }
-    assert_eq!(arr, [1,2,10,4]);
+fn test_empty_macro(){
+    let arr = arr![f32;];
 }
+
+/// This test should cause a helpful compile error if uncommented.
+// #[test]
+// fn test_empty_macro2(){
+//     let arr = arr![];
+// }
 
 #[cfg(feature="serde")]
 mod impl_serde {

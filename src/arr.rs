@@ -1,5 +1,5 @@
 use typenum::U1;
-use core::ops::Add;
+use std::ops::Add;
 use super::ArrayLength;
 
 /// Helper trait for `arr!` macro
@@ -42,10 +42,12 @@ macro_rules! arr_impl {
 }
 
 /// Macro allowing for easy generation of Generic Arrays.
+/// Example: `let test = arr![u32; 1, 2, 3];`
 #[macro_export]
 macro_rules! arr {
     ($T:ty; $($x:expr),*) => (
         arr_impl!($T; U0, [], [$($x),*])
     );
-    ($($x:expr,)*) => (arr![$($x),*])
+    ($($x:expr,)+) => (arr![$($x),*]);
+    () => ("""Macro requires a type, e.g. `let array = arr![u32; 1, 2, 3];`")
 }
