@@ -1,5 +1,5 @@
 use typenum::U1;
-use core::ops::Add;
+use std::ops::Add;
 use super::ArrayLength;
 
 /// Helper trait for `arr!` macro
@@ -25,7 +25,7 @@ macro_rules! arr_impl {
         use generic_array::typenum::U0;
         use generic_array::GenericArray;
         use generic_array::arr::Inc;
-        GenericArray::<$T, $N>::clone_from_slice(&[$($x),*])
+        GenericArray::<$T, $N>::from_slice(&[$($x),*])
     });
     ($T:ty; $N:ty, [], [$x1:expr]) => (
         arr_impl!($T; Inc<$T, $N>, [$x1], [])
