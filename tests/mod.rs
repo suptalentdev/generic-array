@@ -1,8 +1,9 @@
+#![no_std]
 #[macro_use]
 extern crate generic_array;
 use generic_array::typenum::{U3, U97};
 use generic_array::GenericArray;
-use std::ops::Drop;
+use core::ops::Drop;
 
 #[test]
 fn test() {
@@ -10,13 +11,14 @@ fn test() {
     for i in 0..97 {
         list97[i] = i as i32;
     }
-    let l : GenericArray<i32, U97> = GenericArray::from_slice(&list97);
+    let l : GenericArray<i32, U97> = GenericArray::clone_from_slice(&list97);
     assert_eq!(l[0], 0);
     assert_eq!(l[1], 1);
     assert_eq!(l[32], 32);
     assert_eq!(l[56], 56);
 }
 
+#[allow(non_upper_case_globals)]
 static mut drop_counter: u32 = 0;
 
 #[derive(Clone)]
@@ -62,6 +64,23 @@ fn test_copy() {
 #[test]
 fn test_iter_flat_map() {
     assert!((0..5).flat_map(|i| arr![i32; 2 * i, 2 * i + 1]).eq(0..10));
+}
+
+#[test]
+fn test_from_slice() {
+    let arr = [1,2,3,4];
+    let gen_arr = GenericArray::<_, U3>::from_slice(&arr[..3]);
+    assert_eq!(&arr[..3], gen_arr.as_slice());
+}
+
+#[test]
+fn test_from_mut_slice() {
+    let mut arr = [1,2,3,4];
+    {
+        let mut gen_arr = GenericArray::<_, U3>::from_mut_slice(&mut arr[..3]);
+        gen_arr[2] = 10;
+    }
+    assert_eq!(arr, [1,2,10,4]);
 }
 
 #[test]
