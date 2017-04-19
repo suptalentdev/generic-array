@@ -4,6 +4,7 @@ extern crate generic_array;
 use generic_array::typenum::{U1, U3, U97};
 use generic_array::GenericArray;
 use core::ops::Drop;
+use core::cell::Cell;
 
 #[test]
 fn test() {
@@ -18,35 +19,23 @@ fn test() {
     assert_eq!(l[56], 56);
 }
 
-#[allow(non_upper_case_globals)]
-static mut drop_counter: u32 = 0;
-
-#[derive(Clone)]
-struct TestDrop(u32);
-
-impl Drop for TestDrop {
-    fn drop(&mut self) {
-        unsafe {
-            drop_counter += 1;
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq)]
-struct NoClone<T>(T);
-
 #[test]
 fn test_drop() {
-    unsafe {
-        drop_counter = 0;
+    #[derive(Clone)]
+    struct TestDrop<'a>(&'a Cell<u32>);
+
+    impl<'a> Drop for TestDrop<'a> {
+        fn drop(&mut self) {
+            self.0.set(self.0.get() + 1);
+        }
     }
+
+    let drop_counter = Cell::new(0);
     {
         // This clones the structs, so we will have 6 drops, not 3
-        let _: GenericArray<TestDrop, U3> = arr![TestDrop; TestDrop(1), TestDrop(2), TestDrop(3)];
+        let _: GenericArray<TestDrop, U3> = arr![TestDrop; TestDrop(&drop_counter), TestDrop(&drop_counter), TestDrop(&drop_counter)];
     }
-    unsafe {
-        assert_eq!(drop_counter, 6); // 6 drops, as explained above
-    }
+    assert_eq!(drop_counter.get(), 6); // 6 drops, as explained above
 }
 
 #[test]
@@ -76,9 +65,6 @@ fn test_from_slice() {
     let arr = [1, 2, 3, 4];
     let gen_arr = GenericArray::<_, U3>::from_slice(&arr[..3]);
     assert_eq!(&arr[..3], gen_arr.as_slice());
-    let arr = [NoClone(1u32), NoClone(2), NoClone(3), NoClone(4)];
-    let gen_arr = GenericArray::<_, U3>::from_slice(&arr[..3]);
-    assert_eq!(&arr[..3], gen_arr.as_slice());
 }
 
 #[test]
@@ -89,12 +75,6 @@ fn test_from_mut_slice() {
         gen_arr[2] = 10;
     }
     assert_eq!(arr, [1, 2, 10, 4]);
-    let mut arr = [NoClone(1u32), NoClone(2), NoClone(3), NoClone(4)];
-    {
-        let mut gen_arr = GenericArray::<_, U3>::from_mut_slice(&mut arr[..3]);
-        gen_arr[2] = NoClone(10);
-    }
-    assert_eq!(arr, [NoClone(1), NoClone(2), NoClone(10), NoClone(4)]);
 }
 
 #[test]
