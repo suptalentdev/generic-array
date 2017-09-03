@@ -1,29 +1,27 @@
-//! `GenericArray` iterator implementation.
-
 use super::{ArrayLength, GenericArray};
-use core::{cmp, ptr};
-use core::mem::ManuallyDrop;
+use core::cmp;
+use core::ptr;
+use nodrop::NoDrop;
 
 /// An iterator that moves out of a `GenericArray`
 pub struct GenericArrayIter<T, N: ArrayLength<T>> {
     // Invariants: index <= index_back <= N
     // Only values in array[index..index_back] are alive at any given time.
     // Values from array[..index] and array[index_back..] are already moved/dropped.
-    array: ManuallyDrop<GenericArray<T, N>>,
+    array: NoDrop<GenericArray<T, N>>,
     index: usize,
     index_back: usize,
 }
 
 impl<T, N> IntoIterator for GenericArray<T, N>
-where
-    N: ArrayLength<T>,
+    where N: ArrayLength<T>
 {
     type Item = T;
     type IntoIter = GenericArrayIter<T, N>;
 
     fn into_iter(self) -> Self::IntoIter {
         GenericArrayIter {
-            array: ManuallyDrop::new(self),
+            array: NoDrop::new(self),
             index: 0,
             index_back: N::to_usize(),
         }
@@ -31,8 +29,7 @@ where
 }
 
 impl<T, N> Drop for GenericArrayIter<T, N>
-where
-    N: ArrayLength<T>,
+    where N: ArrayLength<T>
 {
     fn drop(&mut self) {
         // Drop values that are still alive.
@@ -45,8 +42,7 @@ where
 }
 
 impl<T, N> Iterator for GenericArrayIter<T, N>
-where
-    N: ArrayLength<T>,
+    where N: ArrayLength<T>
 {
     type Item = T;
 
@@ -91,8 +87,7 @@ where
 }
 
 impl<T, N> DoubleEndedIterator for GenericArrayIter<T, N>
-where
-    N: ArrayLength<T>,
+    where N: ArrayLength<T>
 {
     fn next_back(&mut self) -> Option<T> {
         if self.len() > 0 {
@@ -108,8 +103,7 @@ where
 }
 
 impl<T, N> ExactSizeIterator for GenericArrayIter<T, N>
-where
-    N: ArrayLength<T>,
+    where N: ArrayLength<T>
 {
     fn len(&self) -> usize {
         self.index_back - self.index
