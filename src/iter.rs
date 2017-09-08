@@ -1,15 +1,14 @@
-//! `GenericArray` iterator implementation.
-
 use super::{ArrayLength, GenericArray};
-use core::{cmp, ptr};
-use core::mem::ManuallyDrop;
+use core::cmp;
+use core::ptr;
+use nodrop::NoDrop;
 
 /// An iterator that moves out of a `GenericArray`
 pub struct GenericArrayIter<T, N: ArrayLength<T>> {
     // Invariants: index <= index_back <= N
     // Only values in array[index..index_back] are alive at any given time.
     // Values from array[..index] and array[index_back..] are already moved/dropped.
-    array: ManuallyDrop<GenericArray<T, N>>,
+    array: NoDrop<GenericArray<T, N>>,
     index: usize,
     index_back: usize,
 }
@@ -23,7 +22,7 @@ where
 
     fn into_iter(self) -> Self::IntoIter {
         GenericArrayIter {
-            array: ManuallyDrop::new(self),
+            array: NoDrop::new(self),
             index: 0,
             index_back: N::to_usize(),
         }

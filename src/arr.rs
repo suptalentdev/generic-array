@@ -1,12 +1,9 @@
-//! Implementation for `arr!` macro.
-
 use super::ArrayLength;
 use core::ops::Add;
 use typenum::U1;
 
 /// Helper trait for `arr!` macro
 pub trait AddLength<T, N: ArrayLength<T>>: ArrayLength<T> {
-    /// Resulting length
     type Output: ArrayLength<T>;
 }
 
@@ -22,7 +19,7 @@ where
 /// Helper type for `arr!` macro
 pub type Inc<T, U> = <U as AddLength<T, U1>>::Output;
 
-#[doc(hidden)]
+/// Proper implementation of `arr!`
 #[macro_export]
 macro_rules! arr_impl {
     ($T:ty; $N:ty, [$($x:expr),*], []) => ({

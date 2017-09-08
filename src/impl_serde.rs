@@ -1,5 +1,3 @@
-//! Serde serialization/deserialization implementation
-
 use {ArrayLength, GenericArray};
 use core::fmt;
 use core::marker::PhantomData;
