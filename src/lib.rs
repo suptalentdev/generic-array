@@ -36,7 +36,7 @@
 //! # }
 //! ```
 
-#![deny(missing_docs)]
+//#![deny(missing_docs)]
 #![no_std]
 
 pub extern crate typenum;
@@ -53,7 +53,6 @@ use core::{mem, ptr, slice};
 
 use core::marker::PhantomData;
 use core::mem::ManuallyDrop;
-pub use core::mem::transmute;
 use core::ops::{Deref, DerefMut};
 
 use typenum::bit::{B0, B1};
@@ -62,8 +61,6 @@ use typenum::uint::{UInt, UTerm, Unsigned};
 #[cfg_attr(test, macro_use)]
 pub mod arr;
 pub mod iter;
-pub mod sequence;
-
 pub use iter::GenericArrayIter;
 
 /// Trait making `GenericArray` work, marking types to be used as length of an array
@@ -382,9 +379,6 @@ impl<T, N> GenericArray<T, N>
 where
     N: ArrayLength<T>,
 {
-    /// Creates a new `GenericArray` instance from an iterator with a known exact size.
-    ///
-    /// Returns `None` if the size is not equal to the number of elements in the `GenericArray`.
     pub fn from_exact_iter<I>(iter: I) -> Option<Self>
     where
         I: IntoIterator<Item = T>,
@@ -438,6 +432,13 @@ where
 
         destination.into_inner()
     }
+}
+
+#[inline]
+pub unsafe fn transmute<A, B>(a: A) -> B {
+    let b = ::core::ptr::read(&a as *const A as *const B);
+    ::core::mem::forget(a);
+    b
 }
 
 #[cfg(test)]
