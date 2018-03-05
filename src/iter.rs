@@ -14,9 +14,6 @@ pub struct GenericArrayIter<T, N: ArrayLength<T>> {
     index_back: usize,
 }
 
-unsafe impl<T: Send, N: ArrayLength<T>> Send for GenericArrayIter<T, N> {}
-unsafe impl<T: Sync, N: ArrayLength<T>> Sync for GenericArrayIter<T, N> {}
-
 impl<T, N> IntoIterator for GenericArray<T, N>
 where
     N: ArrayLength<T>,
@@ -37,7 +34,6 @@ impl<T, N> Drop for GenericArrayIter<T, N>
 where
     N: ArrayLength<T>,
 {
-    #[inline]
     fn drop(&mut self) {
         // Drop values that are still alive.
         for p in &mut self.array[self.index..self.index_back] {
@@ -54,28 +50,23 @@ where
 {
     type Item = T;
 
-    #[inline]
     fn next(&mut self) -> Option<T> {
-        if self.index < self.index_back {
-            let p = unsafe {
-                Some(ptr::read(self.array.get_unchecked(self.index)))
-            };
-
-            self.index += 1;
-
-            p
+        if self.len() > 0 {
+            unsafe {
+                let p = self.array.get_unchecked(self.index);
+                self.index += 1;
+                Some(ptr::read(p))
+            }
         } else {
             None
         }
     }
 
-    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.len();
         (len, Some(len))
     }
 
-    #[inline]
     fn count(self) -> usize {
         self.len()
     }
@@ -104,11 +95,11 @@ where
     N: ArrayLength<T>,
 {
     fn next_back(&mut self) -> Option<T> {
-        if self.index < self.index_back {
+        if self.len() > 0 {
             self.index_back -= 1;
-
             unsafe {
-                Some(ptr::read(self.array.get_unchecked(self.index_back)))
+                let p = self.array.get_unchecked(self.index_back);
+                Some(ptr::read(p))
             }
         } else {
             None
