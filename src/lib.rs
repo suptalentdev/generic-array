@@ -1,4 +1,4 @@
-//! This crate implements a structure that can be used as a generic array type.
+//! This crate implements a structure that can be used as a generic array type.use
 //! Core Rust array types `[T; N]` can't be used generically with
 //! respect to `N`, so for example this:
 //!
@@ -98,8 +98,8 @@ impl<T: Clone, U: Clone> Clone for GenericArrayImplEven<T, U> {
             parent1: self.parent1.clone(),
             parent2: self.parent2.clone(),
             _marker: PhantomData,
+        }
     }
-}
 }
 
 impl<T: Copy, U: Copy> Copy for GenericArrayImplEven<T, U> {}
@@ -120,8 +120,8 @@ impl<T: Clone, U: Clone> Clone for GenericArrayImplOdd<T, U> {
             parent1: self.parent1.clone(),
             parent2: self.parent2.clone(),
             data: self.data.clone(),
+        }
     }
-}
 }
 
 impl<T: Copy, U: Copy> Copy for GenericArrayImplOdd<T, U> {}
@@ -138,6 +138,7 @@ unsafe impl<T, N: ArrayLength<T>> ArrayLength<T> for UInt<N, B1> {
 
 /// Struct representing a generic array - `GenericArray<T, N>` works like [T; N]
 #[allow(dead_code)]
+#[repr(transparent)]
 pub struct GenericArray<T, U: ArrayLength<T>> {
     data: U::ArrayType,
 }
