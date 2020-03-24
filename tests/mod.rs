@@ -266,38 +266,6 @@ fn test_split() {
 }
 
 #[test]
-fn test_split_ref() {
-    let a = arr![i32; 1, 2, 3, 4];
-    let a_ref = &a;
-
-    let (b_ref, c_ref) = a_ref.split();
-
-    assert_eq!(b_ref, &arr![i32; 1]);
-    assert_eq!(c_ref, &arr![i32; 2, 3, 4]);
-
-    let (e_ref, f_ref) = a_ref.split();
-
-    assert_eq!(e_ref, &arr![i32; 1, 2]);
-    assert_eq!(f_ref, &arr![i32; 3, 4]);
-}
-
-#[test]
-fn test_split_mut() {
-    let mut a = arr![i32; 1, 2, 3, 4];
-    let a_ref = &mut a;
-
-    let (b_ref, c_ref) = a_ref.split();
-
-    assert_eq!(b_ref, &mut arr![i32; 1]);
-    assert_eq!(c_ref, &mut arr![i32; 2, 3, 4]);
-
-    let (e_ref, f_ref) = a_ref.split();
-
-    assert_eq!(e_ref, &mut arr![i32; 1, 2]);
-    assert_eq!(f_ref, &mut arr![i32; 3, 4]);
-}
-
-#[test]
 fn test_concat() {
     let a = arr![i32; 1, 2];
     let b = arr![i32; 3, 4];
@@ -333,4 +301,21 @@ fn test_sum() {
     let a = sum_generic(arr![i32; 1, 2, 3, 4]);
 
     assert_eq!(a, 10);
+}
+
+#[test]
+fn test_as_ref() {
+    let a = arr![i32; 1, 2, 3, 4];
+    let a_ref: &[i32; 4] = a.as_ref();
+    assert_eq!(a_ref, &[1, 2, 3, 4]);
+}
+
+#[test]
+fn test_as_mut() {
+    let mut a = arr![i32; 1, 2, 3, 4];
+    let a_mut: &mut [i32; 4] = a.as_mut();
+    assert_eq!(a_mut, &mut [1, 2, 3, 4]);
+    a_mut[2] = 0;
+    assert_eq!(a_mut, &mut [1, 2, 0, 4]);
+    assert_eq!(a, arr![i32; 1, 2, 0, 4]);
 }
