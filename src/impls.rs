@@ -133,10 +133,10 @@ macro_rules! impl_from {
                 }
             }
 
-            impl<T> From<GenericArray<T, $ty>> for [T; $n] {
+            impl<T> Into<[T; $n]> for GenericArray<T, $ty> {
                 #[inline(always)]
-                fn from(sel: GenericArray<T, $ty>) -> [T; $n] {
-                    unsafe { $crate::transmute(sel) }
+                fn into(self) -> [T; $n] {
+                    unsafe { $crate::transmute(self) }
                 }
             }
         )*
