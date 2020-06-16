@@ -2,7 +2,7 @@
 //! Core Rust array types `[T; N]` can't be used generically with
 //! respect to `N`, so for example this:
 //!
-//! ```{should_fail}
+//! ```rust{compile_fail}
 //! struct Foo<T, N> {
 //!     data: [T; N]
 //! }
@@ -13,8 +13,9 @@
 //! **generic-array** exports a `GenericArray<T,N>` type, which lets
 //! the above be implemented as:
 //!
-//! ```
-//! # use generic_array::{ArrayLength, GenericArray};
+//! ```rust
+//! use generic_array::{ArrayLength, GenericArray};
+//!
 //! struct Foo<T, N: ArrayLength<T>> {
 //!     data: GenericArray<T,N>
 //! }
@@ -22,7 +23,35 @@
 //!
 //! The `ArrayLength<T>` trait is implemented by default for
 //! [unsigned integer types](../typenum/uint/index.html) from
-//! [typenum](../typenum/index.html).
+//! [typenum](../typenum/index.html):
+//!
+//! ```rust
+//! # use generic_array::{ArrayLength, GenericArray};
+//! use generic_array::typenum::U5;
+//!
+//! struct Foo<N: ArrayLength<i32>> {
+//!     data: GenericArray<i32, N>
+//! }
+//!
+//! # fn main() {
+//! let foo = Foo::<U5>{data: GenericArray::default()};
+//! # }
+//! ```
+//!
+//! For example, `GenericArray<T, U5>` would work almost like `[T; 5]`:
+//!
+//! ```rust
+//! # use generic_array::{ArrayLength, GenericArray};
+//! use generic_array::typenum::U5;
+//!
+//! struct Foo<T, N: ArrayLength<T>> {
+//!     data: GenericArray<T, N>
+//! }
+//!
+//! # fn main() {
+//! let foo = Foo::<i32, U5>{data: GenericArray::default()};
+//! # }
+//! ```
 //!
 //! For ease of use, an `arr!` macro is provided - example below:
 //!
@@ -567,7 +596,7 @@ where
         I: IntoIterator<Item = T>,
         <I as IntoIterator>::IntoIter: ExactSizeIterator,
     {
-        let iter = iter.into_iter();
+        let mut iter = iter.into_iter();
 
         if iter.len() == N::USIZE {
             unsafe {
@@ -576,11 +605,13 @@ where
                 {
                     let (destination_iter, position) = destination.iter_position();
 
-                    destination_iter.zip(iter).for_each(|(dst, src)| {
+                    destination_iter.zip(&mut iter).for_each(|(dst, src)| {
                         ptr::write(dst, src);
 
                         *position += 1;
                     });
+                    assert_eq!(*position, N::USIZE, "ExactSizeIterator lied about its length");
+                    assert!(iter.next().is_none(), "ExactSizeIterator lied about its length");
                 }
 
                 Some(destination.into_inner())
